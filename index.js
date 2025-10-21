@@ -5,6 +5,14 @@ const { Client, Collection, GatewayIntentBits } = require('discord.js');
 require('dotenv').config();
 const token = process.env.DISCORD_BOT_TOKEN;
 
+const mongoose = require('mongoose');
+const { exit } = require('node:process');
+const mongoURL = process.env.MONGO_URI;
+
+mongoose.connect(process.env.MONGO_URI)
+.then(() => console.log("MongoDB connected"))
+.catch(err => console.error("MongoDB connection error:", err));
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.commands = new Collection();
@@ -39,5 +47,7 @@ for (const file of eventFiles) {
 		client.on(event.name, (...args) => event.execute(...args));
 	}
 }
+
+
 
 client.login(token);

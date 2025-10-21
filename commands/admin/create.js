@@ -16,18 +16,24 @@ module.exports = {
 
 		const ctfNameInput = new TextInputBuilder()
 			.setCustomId('ctfNameInput')
-			.setLabel("What's the name of the CTF?")
+			.setLabel("Name of the CTF?")
+			.setStyle(TextInputStyle.Short);
+
+		const ctfImageInput = new TextInputBuilder()
+			.setCustomId('ctfImageInput')
+			.setLabel("Link to CTF image")
 			.setStyle(TextInputStyle.Short);
 
 		const ctfDescriptionInput = new TextInputBuilder()
 			.setCustomId('ctfDescriptionInput')
-			.setLabel("What's the description of the CTF?")
+			.setLabel("Description of the CTF?")
 			.setStyle(TextInputStyle.Paragraph);
 
 		const firstActionRow = new ActionRowBuilder().addComponents(ctfNameInput);
-		const secondActionRow = new ActionRowBuilder().addComponents(ctfDescriptionInput);
+		const secondActionRow = new ActionRowBuilder().addComponents(ctfImageInput);
+		const thirdActionRow = new ActionRowBuilder().addComponents(ctfDescriptionInput);
 
-		modal.addComponents(firstActionRow, secondActionRow);
+		modal.addComponents(firstActionRow, secondActionRow, thirdActionRow);
 
 		await interaction.showModal(modal); 
 		}
