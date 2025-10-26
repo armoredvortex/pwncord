@@ -15,18 +15,18 @@ module.exports = {
 			});
 		}
 
+		await interaction.deferReply(); // only defer after auth check
+
 		try {
 			const activeCTFs = await ctfSchema.find({ active: true });
 			const inactiveCTFs = await ctfSchema.find({ active: false });
 
 			if (activeCTFs.length === 0 && inactiveCTFs.length === 0) {
-				return interaction.reply({
+				return interaction.editReply({
 					content: 'ℹ️ No CTFs found in the database.',
-					flags: MessageFlagsBitField.Flags.Ephemeral,
 				});
 			}
 
-			// Build fancy lists
 			const activeList = activeCTFs.length
 				? activeCTFs.map((ctf, i) => `**${i + 1}.** **${ctf.name}**\n> ID: \`${ctf._id}\``).join('\n')
 				: '*None*';
@@ -40,29 +40,17 @@ module.exports = {
 				.setDescription('A list of all active and inactive CTFs managed by the bot.')
 				.setColor(0x00b0f4)
 				.addFields(
-					{
-						name: '🟢 Active CTFs',
-						value: activeList,
-						inline: false,
-					},
-					{
-						name: '🔴 Inactive CTFs',
-						value: inactiveList,
-						inline: false,
-					}
+					{ name: '🟢 Active CTFs', value: activeList, inline: false },
+					{ name: '🔴 Inactive CTFs', value: inactiveList, inline: false },
 				)
-				.setFooter({
-					text: `CTF Manager • ${new Date().toLocaleDateString()}`,
-				})
+				.setFooter({ text: `CTF Manager • ${new Date().toLocaleDateString()}` })
 				.setThumbnail(fallbackImg);
 
-			await interaction.reply({ embeds: [embed] });
-
+			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
 			console.error(err);
-			await interaction.reply({
+			await interaction.editReply({
 				content: 'There was an error fetching CTF data.',
-				flags: MessageFlagsBitField.Flags.Ephemeral,
 			});
 		}
 	},

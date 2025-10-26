@@ -8,12 +8,13 @@ module.exports = {
 	data: new SlashCommandBuilder()
     .setName('getctf')
     .setDescription('Get information about a CTF')
-    .addStringOption(option => {
-        return option
+    .addStringOption(option => 
+        option
         .setName("id")
         .setDescription("CTF id")
-        .setRequired(true);
-    }),
+        .setAutocomplete(true)
+        .setRequired(true)
+    ),
 	async execute(interaction) {
 		if (!interaction.member.roles.cache.find(r => r.id === ctfAdmin)) {
 			interaction.reply({
@@ -23,10 +24,9 @@ module.exports = {
 		}
 		else {
             await interaction.deferReply();
-            const ctfId = interaction.options.data.find(r => r.name === 'id').value;
-
+            const ctfId = interaction.options.getString('id');
             if (!isValidObjectId(ctfId)) {
-                return interaction.reply({ content: 'Invalid ID format', flags: MessageFlagsBitField.Flags.Ephemeral});
+                return interaction.editReply({ content: 'Invalid ID format', flags: MessageFlagsBitField.Flags.Ephemeral});
             }
 
             try {
@@ -45,6 +45,25 @@ module.exports = {
             }
 		}
 	},
+    async autocomplete(interaction) {
+            const focusedValue = interaction.options.getFocused();
+    
+            try {
+                const ctfs = await ctfSchema.find();
+                const filtered = ctfs.filter(c =>
+                    c.name.toLowerCase().includes(focusedValue.toLowerCase())
+                );
+    
+                await interaction.respond(
+                    filtered.slice(0, 25).map(c => ({
+                        name: `${c.name} — ${c._id.toString()}`, // small suffix for uniqueness
+                        value: c._id,
+                    }))
+                );
+            } catch (err) {
+                console.error('Autocomplete error:', err);
+            }
+        },
 };
 
 function createCTFEmbed(ctf) {

@@ -62,7 +62,7 @@ module.exports = {
 		const ctfName = interaction.options.getString('ctf');
 		const categoryName = interaction.options.getString('name');
 
-		await interaction.deferReply({ ephemeral: true });
+		await interaction.deferReply();
 
 		try {
 			const ctf = await ctfSchema.findOne({ name: ctfName });
@@ -71,7 +71,7 @@ module.exports = {
 			}
 
 			const guild = interaction.guild;
-			const parentCategory = guild.channels.cache.get(ctf.guildCategoryId);
+			const parentCategory = guild.channels.cache.get(ctf.guildCategoryId.slice(2,-1));
 			if (!parentCategory) {
 				return interaction.editReply('⚠️ The parent guild category for this CTF no longer exists!');
 			}
@@ -124,7 +124,7 @@ module.exports = {
 					.setTitle('🗑️ Category Deleted')
 					.setColor(0xff5555)
 					.setDescription(`Deleted **${categoryName}** from **${ctf.name}**.`)
-					.setFooter({ text: 'CTF Manager Bot' });
+					.setFooter({ text: 'pwncord' });
 
 				return interaction.editReply({ embeds: [embed] });
 			}
@@ -146,7 +146,7 @@ module.exports = {
 
 			await interaction.respond(
 				filtered.slice(0, 25).map(c => ({
-					name: `${c.name} — ${c._id.toString().slice(-5)}`, // small suffix for uniqueness
+					name: `${c.name} — ${c._id.toString()}`, // small suffix for uniqueness
 					value: c.name,
 				}))
 			);
