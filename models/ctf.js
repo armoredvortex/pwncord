@@ -1,5 +1,4 @@
 const {Schema, model} = require('mongoose');
-const { type } = require('os');
 
 let ctf = new Schema({
     name: String,
