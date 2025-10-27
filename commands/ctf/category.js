@@ -1,6 +1,5 @@
 const {
 	SlashCommandBuilder,
-	PermissionFlagsBits,
 	ChannelType,
 	EmbedBuilder,
 	MessageFlagsBitField,
@@ -21,14 +20,14 @@ module.exports = {
 						.setName('ctf')
 						.setDescription('Select the CTF to add a category to')
 						.setAutocomplete(true)
-						.setRequired(true)
+						.setRequired(true),
 				)
 				.addStringOption(opt =>
 					opt
 						.setName('name')
 						.setDescription('Name of the category (e.g. Web, Crypto)')
-						.setRequired(true)
-				)
+						.setRequired(true),
+				),
 		)
 		.addSubcommand(sub =>
 			sub
@@ -39,14 +38,14 @@ module.exports = {
 						.setName('ctf')
 						.setDescription('Select the CTF to delete a category from')
 						.setAutocomplete(true)
-						.setRequired(true)
+						.setRequired(true),
 				)
 				.addStringOption(opt =>
 					opt
 						.setName('name')
 						.setDescription('Name of the category to delete')
-						.setRequired(true)
-				)
+						.setRequired(true),
+				),
 		),
 
 	async execute(interaction) {
@@ -71,7 +70,7 @@ module.exports = {
 			}
 
 			const guild = interaction.guild;
-			const parentCategory = guild.channels.cache.get(ctf.guildCategoryId.slice(2,-1));
+			const parentCategory = guild.channels.cache.get(ctf.guildCategoryId.slice(2, -1));
 			if (!parentCategory) {
 				return interaction.editReply('⚠️ The parent guild category for this CTF no longer exists!');
 			}
@@ -98,7 +97,7 @@ module.exports = {
 					.setColor(0x00ff99)
 					.setDescription(
 						`Added **${categoryName}** to **${ctf.name}**.\n` +
-						`🗂️ Channel: ${newChannel}`
+						`🗂️ Channel: ${newChannel}`,
 					)
 					.setFooter({ text: 'CTF Manager Bot' });
 
@@ -113,7 +112,7 @@ module.exports = {
 
 				// Find and delete corresponding channel
 				const existingChannel = guild.channels.cache.find(
-					c => c.parentId === parentCategory.id && c.name.toLowerCase() === categoryName.toLowerCase()
+					c => c.parentId === parentCategory.id && c.name.toLowerCase() === categoryName.toLowerCase(),
 				);
 				if (existingChannel) await existingChannel.delete(`Deleted category ${categoryName} from ${ctf.name}`);
 
@@ -128,7 +127,8 @@ module.exports = {
 
 				return interaction.editReply({ embeds: [embed] });
 			}
-		} catch (err) {
+		}
+		catch (err) {
 			console.error(err);
 			return interaction.editReply('❌ Something went wrong while managing categories.');
 		}
@@ -141,16 +141,17 @@ module.exports = {
 		try {
 			const ctfs = await ctfSchema.find();
 			const filtered = ctfs.filter(c =>
-				c.name.toLowerCase().includes(focusedValue.toLowerCase())
+				c.name.toLowerCase().includes(focusedValue.toLowerCase()),
 			);
 
 			await interaction.respond(
 				filtered.slice(0, 25).map(c => ({
-					name: `${c.name} — ${c._id.toString()}`, // small suffix for uniqueness
+					name: `${c.name} — ${c._id.toString()}`,
 					value: c.name,
-				}))
+				})),
 			);
-		} catch (err) {
+		}
+		catch (err) {
 			console.error('Autocomplete error:', err);
 		}
 	},

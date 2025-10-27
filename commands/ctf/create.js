@@ -12,30 +12,30 @@ module.exports = {
 			});
 		}
 		else {
-		const modal = new ModalBuilder().setCustomId('createCTF').setTitle('Create a new CTF');
+			const modal = new ModalBuilder().setCustomId('createCTF').setTitle('Create a new CTF');
 
-		const ctfNameInput = new TextInputBuilder()
-			.setCustomId('ctfNameInput')
-			.setLabel("Name of the CTF?")
-			.setStyle(TextInputStyle.Short);
+			const ctfNameInput = new TextInputBuilder()
+				.setCustomId('ctfNameInput')
+				.setLabel('Name of the CTF?')
+				.setStyle(TextInputStyle.Short);
 
-		const ctfImageInput = new TextInputBuilder()
-			.setCustomId('ctfImageInput')
-			.setLabel("Link to CTF image")
-			.setStyle(TextInputStyle.Short);
+			const ctfImageInput = new TextInputBuilder()
+				.setCustomId('ctfImageInput')
+				.setLabel('Link to CTF image')
+				.setStyle(TextInputStyle.Short);
 
-		const ctfDescriptionInput = new TextInputBuilder()
-			.setCustomId('ctfDescriptionInput')
-			.setLabel("Description of the CTF?")
-			.setStyle(TextInputStyle.Paragraph);
+			const ctfDescriptionInput = new TextInputBuilder()
+				.setCustomId('ctfDescriptionInput')
+				.setLabel('Description of the CTF?')
+				.setStyle(TextInputStyle.Paragraph);
 
-		const firstActionRow = new ActionRowBuilder().addComponents(ctfNameInput);
-		const secondActionRow = new ActionRowBuilder().addComponents(ctfImageInput);
-		const thirdActionRow = new ActionRowBuilder().addComponents(ctfDescriptionInput);
+			const firstActionRow = new ActionRowBuilder().addComponents(ctfNameInput);
+			const secondActionRow = new ActionRowBuilder().addComponents(ctfImageInput);
+			const thirdActionRow = new ActionRowBuilder().addComponents(ctfDescriptionInput);
 
-		modal.addComponents(firstActionRow, secondActionRow, thirdActionRow);
+			modal.addComponents(firstActionRow, secondActionRow, thirdActionRow);
 
-		await interaction.showModal(modal); 
+			await interaction.showModal(modal);
 		}
 	},
 };

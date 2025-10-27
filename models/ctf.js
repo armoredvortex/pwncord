@@ -1,19 +1,19 @@
-const {Schema, model} = require('mongoose');
+const { Schema, model } = require('mongoose');
 
-let ctf = new Schema({
-    name: String,
-    imageURL: String,
-    description: String,
-    active: {
-        type: Boolean,
-        default: true,
-    },
-    guildCategoryId: String,
-    announcementsId: String,
-    scoreboardId: String,
-    generalId: String,
-    categories: [String],
-})
+const ctf = new Schema({
+	name: String,
+	imageURL: String,
+	description: String,
+	active: {
+		type: Boolean,
+		default: true,
+	},
+	guildCategoryId: String,
+	announcementsId: String,
+	scoreboardId: String,
+	generalId: String,
+	categories: [String],
+});
 
 // For a CTF there should be the following channels:
 // #annoouncements
@@ -22,4 +22,4 @@ let ctf = new Schema({
 // # [#category-1, #category-2, ...];
 
 
-module.exports = model('ctfSchema',  ctf);
+module.exports = model('ctfSchema', ctf);

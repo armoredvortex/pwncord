@@ -15,7 +15,7 @@ module.exports = {
 			});
 		}
 
-		await interaction.deferReply(); // only defer after auth check
+		await interaction.deferReply();
 
 		try {
 			const activeCTFs = await ctfSchema.find({ active: true });
@@ -47,7 +47,8 @@ module.exports = {
 				.setThumbnail(fallbackImg);
 
 			await interaction.editReply({ embeds: [embed] });
-		} catch (err) {
+		}
+		catch (err) {
 			console.error(err);
 			await interaction.editReply({
 				content: 'There was an error fetching CTF data.',
