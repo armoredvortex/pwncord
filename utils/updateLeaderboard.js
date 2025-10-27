@@ -27,7 +27,8 @@ module.exports = async function updateLeaderboard(client, ctfId) {
 
 		if (pageEntries.length === 0) {
 			embed.addFields({ name: 'Top Players', value: '*No solves yet*' });
-		} else {
+		}
+		else {
 			const formatted = pageEntries
 				.map(([id, score], i) => {
 					const rank = start + i + 1;
@@ -62,7 +63,7 @@ module.exports = async function updateLeaderboard(client, ctfId) {
 				.setCustomId('last')
 				.setEmoji('⏭️')
 				.setStyle(ButtonStyle.Secondary)
-				.setDisabled(page === totalPages - 1)
+				.setDisabled(page === totalPages - 1),
 		);
 	};
 
@@ -79,7 +80,7 @@ module.exports = async function updateLeaderboard(client, ctfId) {
 
 		// --- Pagination interaction collector ---
 		const collector = message.createMessageComponentCollector({
-			time: 5 * 60 * 1000, // 5 minutes
+			time: 5 * 60 * 1000,
 		});
 
 		collector.on('collect', async (i) => {
@@ -102,7 +103,8 @@ module.exports = async function updateLeaderboard(client, ctfId) {
 			disabledRow.components.forEach((btn) => btn.setDisabled(true));
 			await message.edit({ components: [disabledRow] });
 		});
-	} catch (err) {
+	}
+	catch (err) {
 		console.error('Leaderboard update failed:', err);
 	}
 };

@@ -15,6 +15,7 @@ const ctf = new Schema({
 	flag: String,
 	points: Number,
 	category: String,
+	messageId: String,
 });
 
 ctf.pre('save', async function(next) {

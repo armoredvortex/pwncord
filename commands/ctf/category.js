@@ -137,9 +137,9 @@ module.exports = {
 
 	async autocomplete(interaction) {
 		const sub = interaction.options.getSubcommand();
-		const focused = interaction.options.getFocused(true); // { name, value }
-		const focusedName = focused.name;  // which option is being filled ("ctf" or "name")
-		const focusedValue = focused.value; // the actual text user typed
+		const focused = interaction.options.getFocused(true);
+		const focusedName = focused.name;
+		const focusedValue = focused.value;
 
 		try {
 			// 🔹 Autocomplete for CTF selection

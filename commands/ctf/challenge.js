@@ -30,7 +30,8 @@ module.exports = {
 					opt
 						.setName('category')
 						.setDescription('Name of the category (e.g. web, crypto) — channel where the challenge will be posted')
-						.setRequired(true),
+						.setRequired(true)
+						.setAutocomplete(true),
 				)
 				.addIntegerOption(opt =>
 					opt
@@ -54,7 +55,8 @@ module.exports = {
 					opt
 						.setName('name')
 						.setDescription('Name of the challenge to delete')
-						.setRequired(true),
+						.setRequired(true)
+						.setAutocomplete(true),
 				),
 		),
 
@@ -68,7 +70,7 @@ module.exports = {
 		}
 
 		const sub = interaction.options.getSubcommand();
-		const ctfName = interaction.options.getString('ctf');
+		const ctfId = interaction.options.getString('ctf');
 		const categoryName = interaction.options.getString(sub === 'add' ? 'category' : 'name');
 		// const points = interaction.options.getString(sub === 'add')
 
@@ -77,12 +79,12 @@ module.exports = {
 		if (sub === 'delete') await interaction.deferReply();
 
 		try {
-			const ctf = await ctfSchema.findOne({ name: ctfName });
+			const ctf = await ctfSchema.findById(ctfId);
 			if (!ctf) {
-				return interaction.editReply(`❌ Could not find CTF **${ctfName}**.`);
+				return interaction.editReply(`❌ Could not find CTF **${ctfId}**.`);
 			}
 
-			let parentCategoryId = ctf.guildCategoryId;
+			const parentCategoryId = ctf.guildCategoryId;
 
 			if (!parentCategoryId) {
 				return interaction.editReply('⚠️ The parent guild category for this CTF is not set or invalid.');
@@ -162,10 +164,24 @@ module.exports = {
 				const existingChannel = guild.channels.cache.find(
 					c => c.parentId === parentCategory.id && c.name.toLowerCase() === categoryName.toLowerCase(),
 				);
-				if (existingChannel) await existingChannel.delete(`Deleted category ${categoryName} from ${ctf.name}`);
 
-				// delete from DB by name + ctf
-				await challSchema.deleteOne({ name: categoryName, ctfID: ctf._id });
+				// Find the challenge
+				const challenge = await challSchema.findOne({ name: categoryName, ctfID: ctf._id });
+				if (!challenge) {
+					return interaction.editReply({ content: `❌ Challenge **${categoryName}** not found for ${ctf.name}.` });
+				}
+
+				try {
+					if (challenge.messageId && existingChannel) {
+						const message = await existingChannel.messages.fetch(challenge.messageId).catch(() => null);
+						if (message) await message.delete();
+					}
+				}
+				catch (err) {
+					console.warn(`⚠️ Could not delete message for ${challenge.name}:`, err);
+				}
+
+				await challSchema.deleteOne({ _id: challenge._id });
 
 				const embed = new EmbedBuilder()
 					.setTitle('🗑️ Challenge Deleted')
@@ -175,6 +191,7 @@ module.exports = {
 
 				return interaction.editReply({ embeds: [embed] });
 			}
+
 		}
 		catch (err) {
 			console.error(err);
@@ -182,21 +199,74 @@ module.exports = {
 		}
 	},
 
-	// Autocomplete unchanged, but cleaned
 	async autocomplete(interaction) {
-		const focusedValue = interaction.options.getFocused();
-		try {
-			const ctfs = await ctfSchema.find();
-			const filtered = ctfs.filter(c =>
-				c.name.toLowerCase().includes(String(focusedValue).toLowerCase()),
-			);
+		const sub = interaction.options.getSubcommand();
+		const focused = interaction.options.getFocused(true);
+		const focusedName = focused.name;
+		const focusedValue = focused.value;
 
-			await interaction.respond(
-				filtered.slice(0, 25).map(c => ({
-					name: `${c.name} — ${c._id.toString()}`,
-					value: c.name,
-				})),
-			);
+		try {
+			if (focusedName === 'ctf') {
+				const ctfs = await ctfSchema.find();
+				const filtered = focusedValue
+					? ctfs.filter(c => c.name.toLowerCase().includes(focusedValue.toLowerCase()))
+					: ctfs;
+
+				return interaction.respond(
+					filtered.slice(0, 25).map(c => ({
+						name: `${c.name} — ${c._id.toString()}`,
+						value: c._id.toString(),
+					})),
+				);
+			}
+
+			if (focusedName === 'category' && sub === 'add') {
+				const ctfId = interaction.options.getString('ctf');
+				if (!ctfId) return interaction.respond([]);
+
+				const ctf = await ctfSchema.findById(ctfId);
+				if (!ctf || !Array.isArray(ctf.categories)) return interaction.respond([]);
+
+				// Filter categories based on user input
+				const filteredCategories = focusedValue
+					? ctf.categories.filter(cat => cat.toLowerCase().includes(focusedValue.toLowerCase()))
+					: ctf.categories;
+
+				return interaction.respond(
+					filteredCategories.slice(0, 25).map(cat => ({
+						name: cat,
+						value: cat,
+					})),
+				);
+			}
+			if (focusedName === 'name' && sub === 'delete') {
+				const ctfId = interaction.options.getString('ctf');
+				if (!ctfId) return interaction.respond([]);
+
+				try {
+					// Filter challenges by ctfID field
+					const challenges = await challSchema.find({ ctfID: ctfId });
+
+					if (!challenges.length) {return interaction.respond([]);}
+
+					const filtered = challenges.filter(ch =>
+						ch.name.toLowerCase().includes(focusedValue.toLowerCase()),
+					);
+
+					// Discord limits to 25 suggestions per autocomplete
+					await interaction.respond(
+						filtered.slice(0, 25).map(ch => ({
+							name: ch.name,
+							value: ch.name,
+						})),
+					);
+				}
+				catch (err) {
+					console.error('Autocomplete error:', err);
+					await interaction.respond([]);
+				}
+			}
+
 		}
 		catch (err) {
 			console.error('Autocomplete error:', err);

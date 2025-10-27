@@ -1,12 +1,10 @@
-const { ActionRowBuilder, Events, MessageFlags, ChannelType, PermissionFlagsBits, MessageFlagsBitField, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { Events, MessageFlagsBitField } = require('discord.js');
 const ctfSchema = require('../models/ctf.js');
-const { ctfAdmin } = require('../config.json');
 const challSchema = require('../models/challenge.js');
-const ctf = require('../models/ctf.js');
 const bcrypt = require('bcrypt');
 const userSolve = require('../models/userSolve.js');
 const updateLeaderboard = require('../utils/updateLeaderboard.js');
-const createCTF  = require('../utils/createCTF.js');
+const createCTF = require('../utils/createCTF.js');
 const addChallenge = require('../utils/addChallenge.js');
 
 module.exports = {
@@ -24,7 +22,7 @@ module.exports = {
 
 		if (interaction.customId.startsWith('submit')) {
 			try {
-				await interaction.deferReply({ ephemeral: true }); // close modal safely
+				await interaction.deferReply({ ephemeral: true });
 
 				const challengeId = interaction.customId.split('_')[1];
 				const chall = await challSchema.findById(challengeId);
@@ -51,7 +49,7 @@ module.exports = {
 				}
 
 				const alreadySolved = solveDoc.solvedChallenges.some(
-					(id) => id.toString() === challengeId
+					(id) => id.toString() === challengeId,
 				);
 
 				if (alreadySolved) {
@@ -67,7 +65,7 @@ module.exports = {
 				// --- Optional: Update leaderboard ---
 				await ctfSchema.updateOne(
 					{ _id: chall.ctfID },
-					{ $inc: { [`leaderboard.${interaction.user.id}`]: chall.points } }
+					{ $inc: { [`leaderboard.${interaction.user.id}`]: chall.points } },
 				);
 
 				await interaction.editReply({
@@ -75,16 +73,18 @@ module.exports = {
 				});
 
 				await updateLeaderboard(interaction.client, chall.ctfID);
-			} catch (err) {
+			}
+			catch (err) {
 				console.error('Error verifying flag:', err);
 				if (interaction.deferred || interaction.replied) {
 					await interaction.editReply({
 						content: '⚠️ Something went wrong while checking your flag.',
 					});
-				} else {
+				}
+				else {
 					await interaction.reply({
 						content: '⚠️ Something went wrong while checking your flag.',
-						ephemeral: true,
+						flags: MessageFlagsBitField.Flags.Ephemeral,
 					});
 				}
 			}
