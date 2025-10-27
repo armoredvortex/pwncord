@@ -31,6 +31,12 @@ module.exports = {
 						.setName('category')
 						.setDescription('Name of the category (e.g. web, crypto) — channel where the challenge will be posted')
 						.setRequired(true),
+				)
+				.addIntegerOption(opt =>
+					opt
+						.setName('points')
+						.setDescription('Points for challenge')
+						.setRequired(true),
 				),
 		)
 		.addSubcommand(sub =>
@@ -64,6 +70,7 @@ module.exports = {
 		const sub = interaction.options.getSubcommand();
 		const ctfName = interaction.options.getString('ctf');
 		const categoryName = interaction.options.getString(sub === 'add' ? 'category' : 'name');
+		// const points = interaction.options.getString(sub === 'add')
 
 		// we will show modal for add, so don't defer (modal is the first response)
 		// only defer for delete
@@ -96,9 +103,12 @@ module.exports = {
 
 			// --- OPEN MODAL FOR ADD ---
 			if (sub === 'add') {
+
+				const points = interaction.options.getInteger('points');
+
 				// Build modal
 				const modal = new ModalBuilder()
-					.setCustomId(`addChallenge|${ctf._id.toString()}|${encodeURIComponent(categoryName)}`)
+					.setCustomId(`addChallenge|${ctf._id.toString()}|${encodeURIComponent(categoryName)}|${points}`)
 					.setTitle(`Add Challenge — ${categoryName}`);
 
 				const nameInput = new TextInputBuilder()

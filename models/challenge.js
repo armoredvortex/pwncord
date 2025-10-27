@@ -13,6 +13,7 @@ const ctf = new Schema({
 	},
 	author: String,
 	flag: String,
+	points: Number,
 	category: String,
 });
 

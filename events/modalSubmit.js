@@ -82,8 +82,10 @@ module.exports = {
 			await interaction.deferReply({ flags: MessageFlagsBitField.Flags.Ephemeral });
 
 			// Parse customId like: addChallenge_<ctfID>_<categoryName>
-			const ctfID = interaction.customId.split('|')[1];
-			const categoryName = interaction.customId.split('|')[2];
+			const options = interaction.customId.split('|');
+			const ctfID = options[1];
+			const categoryName = options[2];
+			const points = options[3];
 
 			const challengeName = interaction.fields.getTextInputValue('challengeName');
 			const description = interaction.fields.getTextInputValue('challengeDescription');
@@ -116,13 +118,14 @@ module.exports = {
 				url,
 				author,
 				flag,
+				points,
 				category: categoryName,
 			});
 
 			await newChallenge.save();
 			// Post challenge embed in that channel
 			const embed = {
-				title: `🧩 ${challengeName}`,
+				title: `🧩 ${challengeName} - ${points} Point(s)`,
 				description,
 				color: 0x00b0f4,
 				fields: [
