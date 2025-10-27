@@ -5,6 +5,7 @@ const challSchema = require('../models/challenge.js');
 const ctf = require('../models/ctf.js');
 const bcrypt = require('bcrypt');
 const userSolve = require('../models/userSolve.js');
+const updateLeaderboard = require('../utils/updateLeaderboard.js');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -63,17 +64,31 @@ module.exports = {
 				topic: `${ctfName} general`,
 			});
 
+			const scoreboardEmbed = {
+				title: `${ctfName} — Scoreboard`,
+				description: ctfDescription,
+				color: 0x00b0f4,
+				fields: [{ name: 'Top Players', value: '*No solves yet*' }],
+				thumbnail: { url: ctfImage },
+				timestamp: new Date(),
+			};
+
+			const scoreboardMessage = await scoreboard.send({ embeds: [scoreboardEmbed] });
+
+
 			const newCTF = new ctfSchema({
 				name: ctfName,
 				imageURL: ctfImage,
 				description: ctfDescription,
 				guildCategoryId: category,
 				announcementsId: announcements,
+				scoreboardMessageId: scoreboardMessage.id,
 				scoreboardId: scoreboard,
 				generalId: general,
 				categories: [],
 			});
 
+			console.log(scoreboardMessage.id);
 
 			await newCTF.save();
 
@@ -203,6 +218,8 @@ module.exports = {
 				await interaction.editReply({
 					content: `✅ Correct flag! You earned **${chall.points} points**.`,
 				});
+
+				await updateLeaderboard(interaction.client, chall.ctfID);
 			} catch (err) {
 				console.error('Error verifying flag:', err);
 				if (interaction.deferred || interaction.replied) {

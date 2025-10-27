@@ -10,6 +10,7 @@ const ctf = new Schema({
 	},
 	guildCategoryId: String,
 	announcementsId: String,
+	scoreboardMessageId: String, 
 	scoreboardId: String,
 	generalId: String,
 	categories: [String],
