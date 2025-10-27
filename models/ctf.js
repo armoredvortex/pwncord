@@ -10,11 +10,11 @@ const ctf = new Schema({
 	},
 	guildCategoryId: String,
 	announcementsId: String,
-	scoreboardMessageId: String, 
+	scoreboardMessageId: String,
 	scoreboardId: String,
 	generalId: String,
 	categories: [String],
-		leaderboard: {
+	leaderboard: {
 		type: Map,
 		of: Number,
 		default: {},

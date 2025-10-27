@@ -44,6 +44,7 @@ module.exports = {
 					opt
 						.setName('name')
 						.setDescription('Name of the category to delete')
+						.setAutocomplete(true)
 						.setRequired(true),
 				),
 		),
@@ -58,19 +59,19 @@ module.exports = {
 		}
 
 		const sub = interaction.options.getSubcommand();
-		const ctfName = interaction.options.getString('ctf');
+		const ctfId = interaction.options.getString('ctf');
 		const categoryName = interaction.options.getString('name');
 
 		await interaction.deferReply();
 
 		try {
-			const ctf = await ctfSchema.findOne({ name: ctfName });
+			const ctf = await ctfSchema.findById(ctfId);
 			if (!ctf) {
-				return interaction.editReply(`❌ Could not find CTF **${ctfName}**.`);
+				return interaction.editReply(`❌ Could not find CTF **${ctfId}**.`);
 			}
 
 			const guild = interaction.guild;
-			const parentCategory = guild.channels.cache.get(ctf.guildCategoryId.slice(2, -1));
+			const parentCategory = guild.channels.cache.get(ctf.guildCategoryId);
 			if (!parentCategory) {
 				return interaction.editReply('⚠️ The parent guild category for this CTF no longer exists!');
 			}
@@ -134,22 +135,47 @@ module.exports = {
 		}
 	},
 
-	// 🔮 Autocomplete handler
 	async autocomplete(interaction) {
-		const focusedValue = interaction.options.getFocused();
+		const sub = interaction.options.getSubcommand();
+		const focused = interaction.options.getFocused(true); // { name, value }
+		const focusedName = focused.name;  // which option is being filled ("ctf" or "name")
+		const focusedValue = focused.value; // the actual text user typed
 
 		try {
-			const ctfs = await ctfSchema.find();
-			const filtered = ctfs.filter(c =>
-				c.name.toLowerCase().includes(focusedValue.toLowerCase()),
-			);
+			// 🔹 Autocomplete for CTF selection
+			if (focusedName === 'ctf') {
+				const ctfs = await ctfSchema.find();
+				const filtered = focusedValue
+					? ctfs.filter(c => c.name.toLowerCase().includes(focusedValue.toLowerCase()))
+					: ctfs;
 
-			await interaction.respond(
-				filtered.slice(0, 25).map(c => ({
-					name: `${c.name} — ${c._id.toString()}`,
-					value: c.name,
-				})),
-			);
+				return interaction.respond(
+					filtered.slice(0, 25).map(c => ({
+						name: `${c.name} — ${c._id.toString()}`,
+						value: c._id.toString(),
+					})),
+				);
+			}
+
+			// 🔹 Autocomplete for category name (only for delete)
+			if (focusedName === 'name' && sub === 'delete') {
+				const selectedCTFId = interaction.options.getString('ctf');
+				if (!selectedCTFId) return interaction.respond([]);
+
+				const ctf = await ctfSchema.findById(selectedCTFId);
+				if (!ctf || !ctf.categories) return interaction.respond([]);
+
+				const filteredCategories = focusedValue
+					? ctf.categories.filter(cat => cat.toLowerCase().includes(focusedValue.toLowerCase()))
+					: ctf.categories;
+
+				return interaction.respond(
+					filteredCategories.slice(0, 25).map(cat => ({
+						name: cat,
+						value: cat,
+					})),
+				);
+			}
 		}
 		catch (err) {
 			console.error('Autocomplete error:', err);

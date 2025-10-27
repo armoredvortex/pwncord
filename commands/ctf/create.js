@@ -22,7 +22,8 @@ module.exports = {
 			const ctfImageInput = new TextInputBuilder()
 				.setCustomId('ctfImageInput')
 				.setLabel('Link to CTF image')
-				.setStyle(TextInputStyle.Short);
+				.setStyle(TextInputStyle.Short)
+				.setRequired(false);
 
 			const ctfDescriptionInput = new TextInputBuilder()
 				.setCustomId('ctfDescriptionInput')

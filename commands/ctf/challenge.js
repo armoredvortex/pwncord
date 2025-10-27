@@ -82,14 +82,7 @@ module.exports = {
 				return interaction.editReply(`❌ Could not find CTF **${ctfName}**.`);
 			}
 
-			// Try to get stored guildCategory id in a few common forms:
-			let parentCategoryId = null;
-			const gid = ctf.guildCategoryId;
-			if (!gid) parentCategoryId = null;
-
-			if (gid.startsWith('<#') && gid.endsWith('>')) parentCategoryId = gid.slice(2, -1);
-			else parentCategoryId = gid;
-
+			let parentCategoryId = ctf.guildCategoryId;
 
 			if (!parentCategoryId) {
 				return interaction.editReply('⚠️ The parent guild category for this CTF is not set or invalid.');
