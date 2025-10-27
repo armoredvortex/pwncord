@@ -13,13 +13,11 @@ const ctf = new Schema({
 	scoreboardId: String,
 	generalId: String,
 	categories: [String],
+		leaderboard: {
+		type: Map,
+		of: Number,
+		default: {},
+	},
 });
-
-// For a CTF there should be the following channels:
-// #annoouncements
-// #scoreboard
-// #general
-// # [#category-1, #category-2, ...];
-
 
 module.exports = model('ctfSchema', ctf);
